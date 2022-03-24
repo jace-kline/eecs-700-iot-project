@@ -1,0 +1,9 @@
+broker_ip: 192.168.86.82
+port: 8883
+client_name: rpi400
+tls_enabled: true
+cafile: /etc/mosquitto/certs/ca.crt
+certfile: /etc/mosquitto/certs/client-wsl.crt
+keyfile: /etc/mosquitto/certs/client-wsl.key
+subscriptions:
+- "device/rpi400/data"
