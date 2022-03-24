@@ -54,7 +54,7 @@ class Device:
         random.seed(1)
 
     def read(self):
-        return random.randint()
+        return random.randint(0,100)
 
 class Timer:
     def __init__(self):

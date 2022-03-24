@@ -1,16 +1,19 @@
-from .lib import create_mqtt_client, Device, Timer
+from lib import create_mqtt_client, Device, Timer
 import sys
 import time
 import json
 
+timer = Timer()
+
 # when publishing, start a timer
 def on_publish(client, userdata, mid):
-    client.timer.start()
+    timer.start()
 
 # when receiving, stop timer and record duration
 def on_message(client, userdata, message):
-    dur = client.timer.stop()
-    print(dur)
+    if message.topic == f'device/{client.name}/data':
+        dur = timer.stop()
+        print(dur)
 
 def main():
     # read in client name as argument
@@ -23,8 +26,13 @@ def main():
     # create Paho MQTT client from YAML config file
     client = create_mqtt_client(config_yml_path)
 
-    # add a timer object to the client so it can be started/stopped when publishing/receiving
+    # # add a timer object to the client so it can be started/stopped when publishing/receiving
+    # client.timer = Timer()
+    # client.wait_iterations = 3
     client.timer = Timer()
+
+    # set callback function for when message is published
+    client.on_publish = on_publish
 
     # set callback function for receiving messages
     client.on_message = on_message
