@@ -1,0 +1,8 @@
+docker stats
+    // get stats of containers
+
+for i in $(docker container ls --format "{{.ID}}"); do docker inspect -f '{{.State.Pid}} {{.Name}}' $i; done
+    // list PIDs of all docker containers
+
+https://docker-py.readthedocs.io/en/stable/
+    // docker SDK for Python docs

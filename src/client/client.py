@@ -1,18 +1,21 @@
+import os
+import sys
+parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(0, parent_dir + "/lib")
+
 from lib import create_mqtt_client, Device, Timer
 import sys
 import time
 import json
 
-timer = Timer()
-
 # when publishing, start a timer
 def on_publish(client, userdata, mid):
-    timer.start()
+    client.timer.start()
 
 # when receiving, stop timer and record duration
 def on_message(client, userdata, message):
     if message.topic == f'device/{client.name}/data':
-        dur = timer.stop()
+        dur = client.timer.stop()
         print(dur)
 
 def main():

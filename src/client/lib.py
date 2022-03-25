@@ -1,8 +1,8 @@
-import yaml
 import ssl
+import paho.mqtt.client as paho_client
 import random
 from timeit import default_timer as timer
-import paho.mqtt.client as paho_client
+import yaml
 
 def load_yaml(path):
     with open(path, 'r') as stream:
@@ -88,5 +88,3 @@ class Timer:
 
     def durations(self):
         return self.times
-        
-        
