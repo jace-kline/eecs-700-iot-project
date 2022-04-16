@@ -37,9 +37,9 @@ def test_threaded_stats_single_container():
     tester = ContainerTester()
     tester.spawn(1)
     container = tester.all_containers_list()[0]
-    t = AccumulatorThread(gen=container_metrics_generator, args=(container,))
+    t = AccumulatorThread(gen=container_metrics_generator(container), delay=2)
     t.start()
-    sleep(5)
+    sleep(10)
     stop_thread(t)
     res = t.join()
     print(res)
@@ -48,7 +48,7 @@ def test_threaded_stats_multi_container():
     tester = ContainerTester()
     tester.spawn(3)
     threads = [ 
-        AccumulatorThread(gen=container_metrics_generator, args=(container,), delay=2)
+        AccumulatorThread(gen=container_metrics_generator(container), delay=2)
         for container in tester.all_containers_list()
     ]
     for t in threads:

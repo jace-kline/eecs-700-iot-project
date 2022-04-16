@@ -30,7 +30,7 @@ def test_threaded_metrics():
     procs = tester.spawn(2)
 
     threads = [
-        AccumulatorThread(gen=process_metrics_generator, args=(proc,), delay=2)
+        AccumulatorThread(gen=process_metrics_generator(proc), delay=2)
         for proc in procs
     ]
 
