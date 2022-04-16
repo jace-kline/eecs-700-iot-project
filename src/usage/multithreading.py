@@ -11,26 +11,36 @@ class AccumulatorThread(threading.Thread):
     # static termination stuff
     terminate = False
 
-    def __init__(self, queue=queue.Queue(), gen=None, args=(), kwargs={}):
+    def __init__(self, queue=queue.Queue(), delay=0, gen=None, args=(), kwargs={}):
         if gen is None:
             raise ValueError("Must provide 'gen' argument")
         threading.Thread.__init__(self)
-        self._accum = []
-        self._queue = queue
-        self._gen = gen
-        self._args = args
-        self._kwargs = kwargs
+        self._accum = [] # used to collect sampled values
+        self._queue = queue # used to send stop signal to thread
+        self._delay = delay # the time to sleep before re-sampling
+        self._gen = gen # generator function/class that yields values
+        self._args = args # arguments to the generator
+        self._kwargs = kwargs # keyword arguments to the generator
     
     def _should_terminate(self):
         flag = (self._queue.get() is None) if not self._queue.empty() else False
         return AccumulatorThread.terminate or flag
 
     def run(self):
-        for val in self._gen(*self._args, **self._kwargs):
+        gen = self._gen(*self._args, **self._kwargs)
+
+        while True:
             if self._should_terminate():
                 break
             else:
-                self._accum.append(val)
+                try:
+                    val = next(gen)
+                    self._accum.append(val)
+                except StopIteration:
+                    break
+                if self._delay > 0:
+                    sleep(self._delay)
+
 
     def join(self, *args):
         threading.Thread.join(self, *args)
@@ -40,7 +50,6 @@ def producer(seed):
     random.seed(seed)
 
     while True:
-        sleep(1)
         yield random.randint(0,100)
         
 # def collect(id):
@@ -64,9 +73,9 @@ def stop_all_threads():
 
 def main():
     # q = queue.Queue()
-    t = AccumulatorThread(gen=producer, args=(0,))
+    t = AccumulatorThread(gen=producer, args=(0,), delay=2)
     t.start()
-    sleep(5)
+    sleep(10)
     stop_thread(t)
     # AccumulatorThread.terminate = True
     res = t.join()

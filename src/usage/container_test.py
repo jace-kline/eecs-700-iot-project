@@ -4,69 +4,71 @@ import json
 from container_usage import container_metrics_generator
 from multithreading import AccumulatorThread, stop_thread, stop_all_threads
 
-def idx_name(i):
-    return f"test-{i}"
+class ContainerTester(object):
+    def __init__(self):
+        self.client = docker.from_env()
+        self.spawned = []
 
-def spawn_containers(client, n):
-    return [
-        client.containers.run('alpine', '/bin/sh', name=idx_name(i), detach=True, tty=True)
-        for i in range(0, n)
-    ]
+    def spawn(self, n):
+        def idx_name(i):
+            return f"test-{i}"
+
+        self.spawned = [
+            self.client.containers.run('alpine', '/bin/sh', name=idx_name(i), detach=True, tty=True)
+            for i in range(0, n)
+        ]
+
+        return self.spawned
+
+    def __del__(self):
+        for c in self.spawned:
+            c.stop()
+            c.remove()
+        
+        self.client.close()
+
+    def all_containers_list(self):
+        return self.client.containers.list()
 
 def running_containers(containers_list):
     return list(filter(lambda c: c.status == 'running', containers_list))
 
 def test_threaded_stats_single_container():
-    client = docker.from_env()
-    spawned = spawn_containers(client, 1)
-    container = client.containers.list()[0]
+    tester = ContainerTester()
+    tester.spawn(1)
+    container = tester.all_containers_list()[0]
     t = AccumulatorThread(gen=container_metrics_generator, args=(container,))
     t.start()
     sleep(5)
     stop_thread(t)
     res = t.join()
     print(res)
-    for c in spawned:
-        c.stop()
-        c.remove()
-    client.close()
 
 def test_threaded_stats_multi_container():
-    client = docker.from_env()
-    spawned = spawn_containers(client, 3)
+    tester = ContainerTester()
+    tester.spawn(3)
     threads = [ 
-        AccumulatorThread(gen=container_metrics_generator, args=(container,))
-        for container in client.containers.list()
+        AccumulatorThread(gen=container_metrics_generator, args=(container,), delay=2)
+        for container in tester.all_containers_list()
     ]
     for t in threads:
         t.start()
-    sleep(5)
+    sleep(10)
     stop_all_threads()
     results = [ t.join() for t in threads ]
     print(results)
-    for c in spawned:
-        c.stop()
-        c.remove()
-    client.close()
-
-
+    print(results[0])
 
 def get_container_stats():
-    client = docker.from_env()
-    spawned = spawn_containers(client, 1)
-    container = client.containers.list()[0]
+    tester = ContainerTester()
+    container = tester.all_containers_list()[0]
     stats = container.stats(stream=False)
     print(stats)
-    # print(tx_bytes(stats))
-    for c in spawned:
-        c.stop()
-        c.remove()
-    client.close()
 
 def test_print_running():
-    client = docker.from_env()
+    tester = ContainerTester()
     # spawn some containers
-    spawned = spawn_containers(client, 5)
+    spawned = tester.spawn(5)
     print(spawned)
 
     # pause a container, exit a container
@@ -74,10 +76,8 @@ def test_print_running():
     spawned[3].stop()
 
     # get only the 'running' containers
-    running = running_containers(client.containers.list())
+    running = running_containers(spawned)
     print(running)
-
-    client.close()
 
 def main():
     test_threaded_stats_multi_container()

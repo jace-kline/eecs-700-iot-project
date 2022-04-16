@@ -1,7 +1,4 @@
-from http import client
-from time import sleep
-import docker
-import json
+from lib import MetricsSample
 
 def container_stats_cpu_percentage(stats):
     usage_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - stats['precpu_stats']['cpu_usage']['total_usage']
@@ -41,25 +38,9 @@ def container_metrics_generator(container):
         # tx
         tx_bytes_delta = container_stats_network_tx_bytes(stats) - tx_bytes
         tx_bytes = tx_bytes + tx_bytes_delta
-        yield {
+        yield MetricsSample(**{
             'cpu_percentage': container_stats_cpu_percentage(stats),
             'memory_percentage': container_stats_memory_percentage(stats),
             'rx_bytes_delta': rx_bytes_delta,
             'tx_bytes_delta': tx_bytes_delta
-        }
-
-def dockerstats():
-    client = docker.from_env()
-    containers = client.containers.list()
-    container = containers[0]
-    # print_stats_stream(container)
-    for metrics in container_metrics_generator(container):
-        print(metrics)
-
-def print_stats_stream(container):
-    for stats in container.stats(stream=True, decode=True):
-        print(json.dumps(stats, indent=4))
-
-if __name__ == "__main__":
-    dockerstats()
-    # test()
+        })
