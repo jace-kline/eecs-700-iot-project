@@ -1,4 +1,3 @@
-from argparse import ArgumentError
 import concurrent.futures
 import threading
 import queue
@@ -12,9 +11,9 @@ class AccumulatorThread(threading.Thread):
     # static termination stuff
     terminate = False
 
-    def __init__(self, queue=None, gen=None, args=(), kwargs={}):
-        if queue is None or gen is None:
-            raise ArgumentError(argument=None, message="Must provide 'queue' and 'gen' arguments")
+    def __init__(self, queue=queue.Queue(), gen=None, args=(), kwargs={}):
+        if gen is None:
+            raise ValueError("Must provide 'gen' argument")
         threading.Thread.__init__(self)
         self._accum = []
         self._queue = queue
@@ -44,25 +43,28 @@ def producer(seed):
         sleep(1)
         yield random.randint(0,100)
         
-def collect(id):
-    vals = []
-    for val in producer(id):
-        vals.append(val)
-        print(f"From {id}: {val}")
-    return vals
+# def collect(id):
+#     vals = []
+#     for val in producer(id):
+#         vals.append(val)
+#         print(f"From {id}: {val}")
+#     return vals
 
-def futures():
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [ executor.submit(collect, i) for i in range(0, 3) ]
-        sleep(10)
-        results = [ future.result() for future in futures ]
+# def futures():
+#     with concurrent.futures.ThreadPoolExecutor() as executor:
+#         futures = [ executor.submit(collect, i) for i in range(0, 3) ]
+#         sleep(10)
+#         results = [ future.result() for future in futures ]
 
 def stop_thread(t: AccumulatorThread):
     t._queue.put(None)
 
+def stop_all_threads():
+    AccumulatorThread.terminate = True
+
 def main():
-    q = queue.Queue()
-    t = AccumulatorThread(queue=q, gen=producer, args=(0,))
+    # q = queue.Queue()
+    t = AccumulatorThread(gen=producer, args=(0,))
     t.start()
     sleep(5)
     stop_thread(t)
