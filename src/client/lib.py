@@ -20,10 +20,8 @@ def create_mqtt_client(config_yml_path):
     # load config YAML file
     config = load_yaml(config_yml_path)
 
-    # set client params
-    client_name = config['client_name']
-    client = paho_client.Client(client_name)
-    client.name = client_name
+    # create client object
+    client = paho_client.Client("randnum_device")
 
     # if TLS enabled, set TLS properties
     if bool(config['tls_enabled']):
@@ -39,12 +37,6 @@ def create_mqtt_client(config_yml_path):
 
     # attempt to connect to broker
     client.connect(config['broker_ip'], config['port'], 30)
-
-    # subscribe to topics in 'subscriptions' list from config file
-    if "subscriptions" in config.keys():
-        for topic in config['subscriptions']:
-            client.subscribe(topic)
-            print(f"Subscribed to {topic}")
 
     return client
 

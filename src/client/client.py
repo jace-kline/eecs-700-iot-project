@@ -1,22 +1,33 @@
-import os
 import sys
-parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.insert(0, parent_dir + "/lib")
-
 from lib import create_mqtt_client, Device, Timer
 import sys
 import time
 import json
 
-# when publishing, start a timer
-def on_publish(client, userdata, mid):
-    client.timer.start()
+# enable the timer for each data publish?
+ENABLE_TIMER = True
+
+# the MQTT topic the client publishes random values to
+DATA_TOPIC = "device/randnum_device/data"
+
+# the MQTT topics the client subscribes to
+ACK_TOPIC = "device/randnum_device/ack" # indicates broker received data
+SUBSCRIPTIONS = [ ACK_TOPIC ]
+
+def matching_topics(t0, t1):
+    l = min(len(t0), len(t1))
+    return t0[0:l] == t1[0:l]
+
+# # when publishing, start a timer
+# def on_publish(client, userdata, mid):
+#     pass
 
 # when receiving, stop timer and record duration
 def on_message(client, userdata, message):
-    if message.topic == f'device/{client.name}/data':
-        dur = client.timer.stop()
-        print(dur)
+    if message.topic == ACK_TOPIC:
+        if ENABLE_TIMER:
+            dur = client.timer.stop()
+            print(f"RTT: {dur}")
 
 def main():
     # read in client name as argument
@@ -35,29 +46,40 @@ def main():
     client.timer = Timer()
 
     # set callback function for when message is published
-    client.on_publish = on_publish
+    # client.on_publish = on_publish
 
     # set callback function for receiving messages
     client.on_message = on_message
 
+    # subscribe to the topic
+    for topic in SUBSCRIPTIONS:
+        client.subscribe(topic)
+        print(f"Subscribed to {topic}")
+
+    # instantiate device that produces random number data
+    client.device = Device()
+
+    # ping count
+    client.ping = 0
+
     # start new thread to listen to incoming events
     client.loop_start()
-
-    # instantiate device that produces data
-    device = Device()
 
     iterations = 24 # number of loops
     interval = 5 # seconds
 
     # publish new data in a loop
-    for _ in range(0, iterations):
+    # for _ in range(0, iterations):
+    while True:
         # read device data
-        value = device.read()
+        value = client.device.read()
 
         # publish the data
-        topic = f'device/{client.name}/data'
-        payload = json.dumps({ 'value': value })
+        topic = DATA_TOPIC
+        payload = json.dumps({ 'randnum' : value })
         client.publish(topic, payload)
+        if ENABLE_TIMER:
+            client.timer.start()
 
         # wait before looping again
         time.sleep(interval)

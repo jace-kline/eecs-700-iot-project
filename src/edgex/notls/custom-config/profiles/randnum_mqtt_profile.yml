@@ -1,0 +1,30 @@
+name: "randnum_mqtt_profile"
+manufacturer: "iot"
+model: "MQTT-DEVICE"
+description: "Test device profile"
+labels:
+  - "mqtt"
+  - "test"
+deviceResources:
+  - name: randnum
+    description: "device random number"
+    properties:
+      valueType: "Int16"
+      readWrite: "R"
+  - name: ping
+    description: "ping message to check if alive"
+    properties:
+      valueType: "Int16"
+      readWrite: "R"
+  - name: ack
+    description: "acknowledgement value, read by device. should be an echo of randnum value."
+    properties:
+      valueType: "Int16"
+      readWrite: "RW"
+# deviceCommands:
+#   - name: values
+#     readWrite: "R"
+#     resourceOperations:
+#       - { deviceResource: "randnum" }
+#       - { deviceResource: "ping" }
+#       - { deviceResource: "ack" }

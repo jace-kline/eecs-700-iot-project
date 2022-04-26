@@ -1,9 +1,8 @@
 broker_ip: avlzgam5elx7x-ats.iot.us-west-2.amazonaws.com
 port: 8883
-client_name: rpi400
 tls_enabled: true
 cafile: /etc/mosquitto/certs/aws.ca.crt
 certfile: /etc/mosquitto/certs/aws.rpi400.crt
 keyfile: /etc/mosquitto/certs/aws.rpi400.private.key
 subscriptions:
-- "device/rpi400/data"
+- "device/client/ack"

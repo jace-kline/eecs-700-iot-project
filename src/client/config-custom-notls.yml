@@ -1,6 +1,5 @@
 broker_ip: localhost
 port: 1883
-client_name: rpi400
 tls_enabled: false
 subscriptions:
-- "device/rpi400/data"
+- "device/client/ack"
