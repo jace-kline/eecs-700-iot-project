@@ -1,5 +1,3 @@
 broker_ip: localhost
 port: 1883
 tls_enabled: false
-subscriptions:
-- "device/client/ack"

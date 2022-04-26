@@ -4,5 +4,3 @@ tls_enabled: true
 cafile: /etc/mosquitto/certs/aws.ca.crt
 certfile: /etc/mosquitto/certs/aws.rpi400.crt
 keyfile: /etc/mosquitto/certs/aws.rpi400.private.key
-subscriptions:
-- "device/client/ack"

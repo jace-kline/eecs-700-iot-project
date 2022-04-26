@@ -2,8 +2,8 @@ Scenario (either containerized or not):
 - Local MQTT (Mosquitto) broker is deployed
     - configured for either TLS or No TLS (unsecured)
 - Local NoSQL DB is deployed
-- Client publishes periodic messages to PUBLISH_TOPIC
-- Receiver script listens to PUBLISH_TOPIC
+- Client publishes periodic messages to DATA_TOPIC
+- Receiver script listens to DATA_TOPIC
 - On reception of data, receiver stores data to DB
 - After data stored successfully, receiver publishes to ACK_TOPIC
 - Client records the RTT time
