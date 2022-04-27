@@ -1,5 +1,10 @@
-import subprocess, psutil
+import subprocess, psutil, enum
 from time import sleep
+
+class RunType(enum.Enum):
+    _process = 0
+    _container = 1
+    _composefile = 2
 
 # Launch a process
 def launch_process(cmd, popen_kwargs={}):
@@ -54,22 +59,6 @@ def mk_processes(cmds=[], names=[], delay=0.5):
 
     return pidmap.values()
 
-# launch Mosquitto broker
-# return a list of Process objects that are spawned
-def launch(port=1883, configpath=None):
+def mk_containers(containers, composefiles):
+    pass
 
-    cmd = f"mosquitto -d -p {port}" \
-    + (configpath if configpath is not None else "")
-
-    cmds = [cmd]
-    names = ["mosquitto"]
-
-    procs = mk_processes(cmds=cmds, names=names)
-
-    for proc in procs:
-        print(proc.pid)
-        proc.kill()
-
-
-if __name__ == "__main__":
-    launch()
