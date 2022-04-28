@@ -2,6 +2,9 @@ import threading
 import queue
 import random
 from time import sleep
+import logging
+
+logger = logging.getLogger("accum_thread")
 
 # takes a generator function (with __next__() method)
 # produces a thread object that continuously generates & stores values until...
@@ -24,8 +27,6 @@ class AccumulatorThread(threading.Thread):
         return AccumulatorThread.terminate or flag
 
     def run(self):
-        # gen = self._gen(*self._args, **self._kwargs)
-
         while True:
             if self._should_terminate():
                 break
@@ -33,7 +34,8 @@ class AccumulatorThread(threading.Thread):
                 try:
                     val = next(self._gen)
                     self._accum.append(val)
-                except StopIteration:
+                except:
+                    logger.warn("Generator stopped producing values")
                     break
                 if self._delay > 0:
                     sleep(self._delay)

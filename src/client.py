@@ -1,5 +1,5 @@
 import sys
-from lib import create_mqtt_client, Device, Timer
+from lib import create_mqtt_client, load_mqtt_config_yaml, Device, Timer
 import sys
 import time
 import json
@@ -31,16 +31,10 @@ def on_message(client, userdata, message):
             dur = client.timer.stop()
             logger.info(f"RTT = {dur}")
 
-def run_client(interval=2, iterations=100):
-    # read in client name as argument
-    config_yml_path = sys.argv[1] if len(sys.argv) > 1 else None
-
-    if config_yml_path is None:
-        print("Supply MQTT client config YAML file as argument to this script")
-        exit(1)
+def run_client(config, interval=2, iterations=100):
 
     # create Paho MQTT client from YAML config file
-    client = create_mqtt_client(config_yml_path)
+    client = create_mqtt_client(config, "randnum_device")
 
     # # add a timer object to the client so it can be started/stopped when publishing/receiving
     # client.timer = Timer()
@@ -86,6 +80,17 @@ def run_client(interval=2, iterations=100):
     # return the results of the RTT times for further analysis
     return client.timer.durations()
 
+def run_client_script():
+    # read in client name as argument
+    config_yml_path = sys.argv[1] if len(sys.argv) > 1 else None
+
+    if config_yml_path is None:
+        print("Supply MQTT client config YAML file as argument to this script")
+        exit(1)
+    
+    config = load_mqtt_config_yaml(config_yml_path)
+    run_client(config)
+
 # if this script is executed directly (not imported), then run main()
 if __name__ == "__main__":
-    run_client()
+    run_client_script()

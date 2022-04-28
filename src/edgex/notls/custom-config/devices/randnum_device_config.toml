@@ -1,8 +1,0 @@
-[[DeviceList]]
-  Name = "randnum_device"
-  Profile = "randnum_mqtt_profile"
-  Description = "Random Number Generator MQTT device"
-  Labels = [ "MQTT", "test", "randnum_device" ]
-  [DeviceList.Protocols]
-    [DeviceList.Protocols.mqtt]
-      CommandTopic = "command/randnum_device"

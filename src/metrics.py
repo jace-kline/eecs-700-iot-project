@@ -1,4 +1,3 @@
-from lib import MetricsSample
 import psutil
 from functools import reduce
 
