@@ -1,7 +1,7 @@
 import subprocess
 import psutil
 from time import sleep
-from process_usage import process_metrics_generator
+from usage.metrics import process_metrics_generator
 from multithreading import AccumulatorThread, stop_thread, stop_all_threads
 
 class ProcessTester(object):

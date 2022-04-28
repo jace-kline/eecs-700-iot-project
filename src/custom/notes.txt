@@ -8,4 +8,3 @@ Scenario (either containerized or not):
 - After data stored successfully, receiver publishes to ACK_TOPIC
 - Client records the RTT time
 - Iterate
-

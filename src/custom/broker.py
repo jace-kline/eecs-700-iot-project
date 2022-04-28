@@ -56,20 +56,21 @@ def mk_processes(cmds=[], names=[], delay=0.5):
 
 # launch Mosquitto broker
 # return a list of Process objects that are spawned
-def launch(port=1883, configpath=None):
+def launch_broker(port=1883, configpath=None):
 
     cmd = f"mosquitto -d -p {port}" \
     + (configpath if configpath is not None else "")
 
-    cmds = [cmd]
-    names = ["mosquitto"]
+    # launch the process
+    popen = launch_process(cmd)
 
-    procs = mk_processes(cmds=cmds, names=names)
+    # wait until the broker is ready
+    
 
-    for proc in procs:
-        print(proc.pid)
-        proc.kill()
+    # for proc in procs:
+    #     print(proc.pid)
+    #     proc.kill()
 
 
 if __name__ == "__main__":
-    launch()
+    launch_broker()

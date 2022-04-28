@@ -31,7 +31,7 @@ def on_message(client, userdata, message):
             dur = client.timer.stop()
             logger.info(f"RTT = {dur}")
 
-def main():
+def run_client(interval=2, iterations=100):
     # read in client name as argument
     config_yml_path = sys.argv[1] if len(sys.argv) > 1 else None
 
@@ -67,12 +67,8 @@ def main():
     # start new thread to listen to incoming events
     client.loop_start()
 
-    iterations = 24 # number of loops
-    interval = 5 # seconds
-
     # publish new data in a loop
-    # for _ in range(0, iterations):
-    while True:
+    for _ in range(0, iterations):
         # read device data
         value = client.device.read()
 
@@ -87,11 +83,9 @@ def main():
         # wait before looping again
         time.sleep(interval)
 
-    # save the results of the publish->receive durations to a file
-    # durs = client.timer.durations()
-    # for dur in durs:
-    #     print(dur)
+    # return the results of the RTT times for further analysis
+    return client.timer.durations()
 
 # if this script is executed directly (not imported), then run main()
 if __name__ == "__main__":
-    main()
+    run_client()

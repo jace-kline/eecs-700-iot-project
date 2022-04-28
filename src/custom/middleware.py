@@ -4,6 +4,9 @@ import paho.mqtt.client as paho_client
 import yaml
 import json
 import ssl
+import logging
+
+logger = logging.getLogger("middleware")
 
 DATA_TOPIC = "device/randnum_device/data"
 SUBSCRIPTIONS = [ DATA_TOPIC ]
@@ -18,9 +21,9 @@ def create_mqtt_client(config_yml_path):
 
     def on_connect(client, obj, flags, rc):
         if rc == 0:
-            print("MQTT connection successful")
+            logger.info("MQTT connection successful")
         else:
-            print("MQTT connection failed")
+            logger.error("MQTT connection failed")
             client.disconnect()
 
     # load config YAML file
@@ -45,7 +48,7 @@ def create_mqtt_client(config_yml_path):
     return client
 
 def on_message(client, data, message):
-    print(f"Received message from topic '{message.topic}':\n\t{message.payload.decode()}\n")
+    logger.info(f"Received message from topic '{message.topic}':\n\t{message.payload.decode()}\n")
     if message.topic == DATA_TOPIC:
         # extract randnum from message
         data = message.payload.decode()
@@ -55,7 +58,7 @@ def on_message(client, data, message):
         # respond to ACK_TOPIC
         payload = json.dumps({ 'ack' : 1 })
         client.publish(ACK_TOPIC, payload)
-        print(f"Published ACK to {ACK_TOPIC}")
+        logger.info(f"Published ACK to {ACK_TOPIC}")
 
 def main():
     # read in client name as argument
