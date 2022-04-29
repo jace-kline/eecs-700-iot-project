@@ -31,6 +31,16 @@ class MetricsSample(object):
     def merge_many(ls):
         return reduce(lambda l, r: l.merge(r), ls)
 
+# takes a list of lists of generator results and merges the
+# inner lists component-wise based on the time sampled
+# i.e., [res[0][0] + res[1][0] + ..., res[0][1] + res[1][1] + ..., ...]
+def merge_metrics(results):
+    def transpose(ls):
+        minlen = min([len(l) for l in ls])
+        return [[l[i] for l in ls] for i in range(0, minlen)]
+
+    return [ MetricsSample.merge_many(t) for t in transpose(results) ]
+
 def process_cpu_percentage(proc):
     # uses last queried CPU stats as the 'delta' since interval=None
     # returns 0 on first time queried

@@ -21,6 +21,7 @@ class AccumulatorThread(threading.Thread):
         self._queue = queue # used to send stop signal to thread
         self._delay = delay # the time to sleep before re-sampling
         self._gen = gen # generator function/class that yields values
+        self.err = False
     
     def _should_terminate(self):
         flag = (self._queue.get() is None) if not self._queue.empty() else False
@@ -36,6 +37,7 @@ class AccumulatorThread(threading.Thread):
                     self._accum.append(val)
                 except:
                     logger.warn("Generator stopped producing values")
+                    self.err = True
                     break
                 if self._delay > 0:
                     sleep(self._delay)

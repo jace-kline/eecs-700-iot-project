@@ -1,6 +1,7 @@
 from client import run_client
 from lib import create_mqtt_client, MqttConfig
 from runner import CmdLauncher, ScenarioRunner
+from metrics import merge_metrics
 from time import sleep
 
 MQTTCONFIG = MqttConfig(
@@ -64,8 +65,9 @@ def run():
 
     metrics, rtts = runner.run()
     runner.cleanup()
+
     print(rtts)
-    print(metrics)
+    print(merge_metrics(metrics))
 
 
 if __name__ == "__main__":

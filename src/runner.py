@@ -34,16 +34,6 @@ def procs_from_name(name):
         procs += proclist
     return procs
 
-# takes a list of lists of generator results and merges the
-# inner lists component-wise based on the time sampled
-# i.e., [res[0][0] + res[1][0] + ..., res[0][1] + res[1][1] + ..., ...]
-def merge_metrics(results):
-    def transpose(ls):
-        minlen = min([len(l) for l in ls])
-        return [[l[i] for l in ls] for i in range(0, minlen)]
-
-    return [ MetricsSample.merge_many(t) for t in transpose(results) ]
-
 class CmdLaunchError(Exception):
     pass
 
@@ -150,7 +140,7 @@ class ScenarioRunner:
         # collect thread results & merge them by time step
         stop_all_threads()
         logger.info("Stopping threads")
-        metrics = [ t.join() for t in threads ]
+        metrics = [ t.join() for t in threads if not t.err ]
         # merge metrics here??
 
         # return the collected values
