@@ -1,0 +1,30 @@
+version: '3'
+services:
+  middleware:
+    container_name: middleware
+    image: custom-middleware-notls
+    build:
+      context: ..
+      dockerfile: custom-middleware-docker/custom-middleware.dockerfile
+    depends_on:
+      - broker
+      - db
+    tty: true
+    stdin_open: true
+    environment:
+      mqtt_host: broker
+      mqtt_port: 1883
+      redis_host: db
+      redis_port: 6379
+  broker:
+    container_name: broker
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf"
+  db:
+    container_name: db
+    image: redis:latest
+    ports:
+      - "6379:6379"

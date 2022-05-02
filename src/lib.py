@@ -1,13 +1,27 @@
+from os import name
 import ssl
 import paho.mqtt.client as paho_client
 import random
 from timeit import default_timer as timer
 import yaml
 from collections import namedtuple
+import redis
 
 MqttConfig = namedtuple('MqttConfig', [
-    'broker_ip', 'port', 'tls_enabled', 'cafile', 'certfile', 'keyfile'
+    'broker_ip', 'port', 'tls_enabled', 'websockets', 'cafile', 'certfile', 'keyfile'
 ])
+
+RedisConfig = namedtuple('RedisConfig', ['host', 'port', 'db'])
+
+def create_redis_client(redis_conf):
+    host = redis_conf.host
+    port = redis_conf.port
+    db = redis_conf.db
+    return redis.Redis(host=host, port=port, db=db)
+
+def load_redis_config_yaml(path):
+    conf = load_yaml(path)
+    return RedisConfig(**conf)
 
 def load_yaml(path):
     with open(path, 'r') as stream:

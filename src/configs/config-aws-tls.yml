@@ -1,6 +1,7 @@
 broker_ip: avlzgam5elx7x-ats.iot.us-west-2.amazonaws.com
 port: 8883
 tls_enabled: true
+websockets: false
 cafile: /etc/mosquitto/certs/aws.ca.crt
 certfile: /etc/mosquitto/certs/aws.rpi400.crt
 keyfile: /etc/mosquitto/certs/aws.rpi400.private.key

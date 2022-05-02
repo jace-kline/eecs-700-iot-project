@@ -39,9 +39,14 @@ class CmdLaunchError(Exception):
 
 
 class CmdLauncher:
-    def __init__(self, cmd, wait=(lambda: True)):
+    def __init__(self, cmd):
         self.cmd = cmd
-        self.wait = wait
+
+    def wait(self):
+        return True
+
+    def clean(self):
+        return True
 
     def launch(self):
         logger.info(f"Running command '{self.cmd}'")
@@ -148,6 +153,10 @@ class ScenarioRunner:
 
     def cleanup(self):
         if not self.cleaned:
+
+            for launcher in self.launchers:
+                launcher.clean()
+
             for (pid, proc) in self.pid_proc_map.items():
                 try:
                     proc.kill()
