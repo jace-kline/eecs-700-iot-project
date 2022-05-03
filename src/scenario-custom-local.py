@@ -1,28 +1,17 @@
 from client import run_client
-from lib import RedisConfig, create_mqtt_client, MqttConfig
+from lib import RedisConfig, create_mqtt_client, MqttConfig, load_mqtt_config_yaml, load_redis_config_yaml
 from runner import CmdLauncher, ScenarioRunner, log_results
-from metrics import MetricsSample, merge_metrics
 from time import sleep
 import logging
 
 logger = logging.getLogger("scenario")
 logger.setLevel(logging.INFO)
 
-MQTTCONFIG = MqttConfig(
-    broker_ip='localhost',
-    port=1883,
-    tls_enabled=False,
-    websockets=False,
-    cafile=None,
-    certfile=None,
-    keyfile=None
-)
-
-REDISCONFIG = RedisConfig(
-    host='localhost',
-    port=6379,
-    db=0
-)
+# REDISCONFIG = RedisConfig(
+#     host='localhost',
+#     port=6379,
+#     db=0
+# )
 
 class LocalRedisLauncher(CmdLauncher):
     def __init__(self, config, redis_config_path=None):
@@ -60,10 +49,43 @@ class LocalMiddlewareLauncher(CmdLauncher):
         sleep(2)
         return True
 
-def run():
-    mqtt_config_path = "configs/config-custom-notls.yml"
-    redis_config_path = "configs/config-redis-notls.yml"
-    broker_launcher = LocalBrokerLauncher(MQTTCONFIG)
+def run_notls():
+    mqtt_config_path = "config/client/config-custom-notls.yml"
+    redis_config_path = "config/client/config-redis-notls.yml"
+    broker_config_path = "config/mosquitto/mosquitto.notls.conf"
+
+    metrics, rtts = run(mqtt_config_path, redis_config_path, broker_config_path)
+
+    log_results(
+        scenario="Custom Middleware",
+        containerized=False,
+        tls=False,
+        rtts=rtts,
+        metrics=metrics,
+        dryrun=False
+    )
+
+def run_tls():
+    mqtt_config_path = "config/client/config-custom-tls.yml"
+    redis_config_path = "config/client/config-redis-notls.yml"
+    broker_config_path = "config/mosquitto/mosquitto.tls.conf"
+
+    metrics, rtts = run(mqtt_config_path, redis_config_path, broker_config_path)
+
+    log_results(
+        scenario="Custom Middleware",
+        containerized=False,
+        tls=True,
+        rtts=rtts,
+        metrics=metrics,
+        dryrun=False
+    )
+
+def run(mqtt_config_path, redis_config_path, broker_config_path):
+    MQTTCONFIG = load_mqtt_config_yaml(mqtt_config_path)
+    REDISCONFIG = load_redis_config_yaml(redis_config_path)
+    
+    broker_launcher = LocalBrokerLauncher(MQTTCONFIG, broker_config_path=broker_config_path)
     redis_launcher = LocalRedisLauncher(REDISCONFIG)
     middleware_launcher = LocalMiddlewareLauncher(mqtt_config_path, redis_config_path)
 
@@ -80,13 +102,11 @@ def run():
     metrics, rtts = runner.run()
     runner.cleanup()
 
-    log_results(
-        scenario="Custom Middleware",
-        containerized=False,
-        tls=False,
-        rtts=rtts,
-        metrics=metrics
-    )
+    return metrics, rtts
+
+    # print(metrics)
+    # print(rtts)
+
 
 if __name__ == "__main__":
-    run()
+    run_tls()

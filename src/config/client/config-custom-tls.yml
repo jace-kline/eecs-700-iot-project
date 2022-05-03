@@ -1,0 +1,7 @@
+broker_ip: localhost
+port: 8883
+tls_enabled: true
+websockets: false
+cafile: /home/jacekline/dev/eecs-700-iot/eecs-700-iot-project/src/config/certs/ca.crt
+certfile: /home/jacekline/dev/eecs-700-iot/eecs-700-iot-project/src/config/certs/client.crt
+keyfile: /home/jacekline/dev/eecs-700-iot/eecs-700-iot-project/src/config/certs/client.key
