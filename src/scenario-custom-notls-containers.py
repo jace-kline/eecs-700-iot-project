@@ -1,7 +1,6 @@
 from client import run_client
 from lib import MqttConfig
-from runner import CmdLauncher, ScenarioRunner, launch_cmd
-from metrics import merge_metrics
+from runner import CmdLauncher, ScenarioRunner, launch_cmd, log_results
 from time import sleep
 import logging
 
@@ -40,7 +39,7 @@ def run():
     compose_file_path = 'custom-middleware-docker/notls.compose.yml'
     compose_launcher = DockerComposeLauncher(compose_file_path)
 
-    client_func = lambda: run_client(MQTTCONFIG, iterations=5)
+    client_func = lambda: run_client(MQTTCONFIG, iterations=20)
     launchers = [ compose_launcher ]
     runner = ScenarioRunner(
         client_func,
@@ -52,8 +51,13 @@ def run():
     metrics, rtts = runner.run()
     runner.cleanup()
 
-    print(rtts)
-    print(merge_metrics(metrics))
+    log_results(
+        scenario="Custom Middleware",
+        containerized=True,
+        tls=False,
+        rtts=rtts,
+        metrics=metrics
+    )
 
 
 if __name__ == "__main__":

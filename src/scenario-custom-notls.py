@@ -1,7 +1,7 @@
 from client import run_client
 from lib import RedisConfig, create_mqtt_client, MqttConfig
-from runner import CmdLauncher, ScenarioRunner
-from metrics import merge_metrics
+from runner import CmdLauncher, ScenarioRunner, log_results
+from metrics import MetricsSample, merge_metrics
 from time import sleep
 import logging
 
@@ -67,7 +67,7 @@ def run():
     redis_launcher = LocalRedisLauncher(REDISCONFIG)
     middleware_launcher = LocalMiddlewareLauncher(mqtt_config_path, redis_config_path)
 
-    client_func = lambda: run_client(MQTTCONFIG, iterations=5)
+    client_func = lambda: run_client(MQTTCONFIG, iterations=20)
     launchers = [ redis_launcher, broker_launcher, middleware_launcher ]
     runner = ScenarioRunner(
         client_func,
@@ -80,9 +80,13 @@ def run():
     metrics, rtts = runner.run()
     runner.cleanup()
 
-    print(rtts)
-    print(merge_metrics(metrics))
-
+    log_results(
+        scenario="Custom Middleware",
+        containerized=False,
+        tls=False,
+        rtts=rtts,
+        metrics=metrics
+    )
 
 if __name__ == "__main__":
     run()

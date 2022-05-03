@@ -1,3 +1,4 @@
+from re import L
 import psutil
 from functools import reduce
 
@@ -22,14 +23,50 @@ class MetricsSample(object):
 
     # component-wise merge of 2 MetricsSample objects
     def merge(self, other):
+        # return MetricsSample(
+        #     **dict([ (k, v0 + v1) for ((k, v0), v1) 
+        #     in zip(self.__dict__.items(), other.__dict__.values())
+        #     ])
+        # )
         return MetricsSample(
-            **dict([ (k, v0 + v1) for ((k, v0), v1) 
-            in zip(self.__dict__.items(), other.__dict__.values())
-            ])
+            cpu_percentage=self.cpu_percentage + other.cpu_percentage,
+            memory_percentage=self.memory_percentage + other.memory_percentage,
+            rx_bytes_delta=self.rx_bytes_delta + other.rx_bytes_delta,
+            tx_bytes_delta=self.tx_bytes_delta + other.tx_bytes_delta
         )
 
     def merge_many(ls):
         return reduce(lambda l, r: l.merge(r), ls)
+
+    def avg(ls):
+        accum = MetricsSample.merge_many(ls)
+        l = len(ls)
+        return MetricsSample(
+            cpu_percentage=accum.cpu_percentage / l,
+            memory_percentage=accum.memory_percentage / l,
+            rx_bytes_delta=accum.rx_bytes_delta / l,
+            tx_bytes_delta=accum.tx_bytes_delta / l,
+        )
+
+    def max(ls):
+        return MetricsSample(
+            cpu_percentage=max([ s.cpu_percentage for s in ls ]),
+            memory_percentage=max([ s.memory_percentage for s in ls ]),
+            rx_bytes_delta=max([ s.rx_bytes_delta for s in ls ]),
+            tx_bytes_delta=max([ s.tx_bytes_delta for s in ls ])
+        )
+
+    def to_csv_str(self):
+        s = ""
+        metrics = [ self.cpu_percentage, self.memory_percentage, self.rx_bytes_delta, self.tx_bytes_delta ]
+        i = 0
+        for metric in metrics:
+            s += f"{metric}"
+            if i < len(metrics) - 1:
+                s += ","
+            i += 1
+
+        return s
 
 # takes a list of lists of generator results and merges the
 # inner lists component-wise based on the time sampled

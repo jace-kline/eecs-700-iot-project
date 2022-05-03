@@ -173,3 +173,14 @@ class ScenarioRunner:
 
     def __del__(self):
         self.cleanup()
+
+
+def log_results(scenario, containerized=False, tls=False, rtts=[], metrics=[]):
+    merged = merge_metrics(metrics)
+    avg_rtt = sum(rtts) / len(rtts)
+    avg_metrics = MetricsSample.avg(merged)
+    max_rtt = max(rtts)
+    max_metrics = MetricsSample.max(merged)
+    
+    with open('./results.csv', 'a') as f:
+        f.write(f"{scenario},{containerized},{tls},{avg_rtt},{avg_metrics.to_csv_str()},{max_rtt},{max_metrics.to_csv_str()}\n")

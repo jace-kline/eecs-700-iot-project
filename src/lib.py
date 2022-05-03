@@ -95,7 +95,7 @@ class Timer:
             self.reset()
             raise RuntimeError("Timer never started with start() method")
         else:
-            dur = self.end - self.begin
+            dur = (self.end - self.begin) * 1000 # convert s to ms
             self.times.append(dur)
             self.reset()
             return dur
